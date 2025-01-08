@@ -1,3 +1,6 @@
+dataset/raw/test
+dataset/raw/train
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
