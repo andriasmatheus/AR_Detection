@@ -1,3 +1,4 @@
+"""
 import cv2
 import time
 from ultralytics import YOLO
@@ -15,8 +16,8 @@ if not cap.isOpened():
 
 # Definir a largura e altura da janela de exibição
 window_width, window_height = 1280, 720
-cv2.namedWindow('YOLOv5 Detection', cv2.WINDOW_NORMAL)
-cv2.resizeWindow('YOLOv5 Detection', window_width, window_height)
+cv2.namedWindow('YOLOv11 Detection', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('YOLOv11 Detection', window_width, window_height)
 
 # Configurar o VideoWriter para salvar o vídeo de saída
 output_video_path = 'final.avi'
@@ -54,3 +55,30 @@ while cap.isOpened():
 cap.release()
 out.release()
 cv2.destroyAllWindows()
+"""
+
+import numpy as np
+import openpifpaf
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Carregue sua imagem e converta para NumPy
+image = Image.open('dataset/raw/capture.png').convert('RGB')
+image_np = np.array(image)
+
+# Processamento de imagem com OpenPifPaf
+predictor = openpifpaf.Predictor(checkpoint='resnet50')
+predictions, _, _ = predictor.numpy_image(image_np)
+
+# Visualização
+fig, ax = plt.subplots(figsize=(10, 10))
+ax.imshow(image_np)
+openpifpaf.show.AnnotationPainter().annotations(ax, predictions)
+plt.axis('off')
+
+# Salvar a imagem final
+output_path = 'imagem_processada_com_deteccoes.png'
+plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+plt.show()
+
+print(f"Imagem salva em: {output_path}")
