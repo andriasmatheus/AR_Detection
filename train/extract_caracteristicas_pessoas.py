@@ -65,7 +65,7 @@ def calcular_convex_hull(pontos):
     
     return hull
 
-def get_caracteristicas_esqueleto(prediction):
+def get_caracteristicas(prediction):
     caracteristicas = []
 
     keypoints = prediction.data.reshape(-1, 3)  # Reshape to (num_keypoints, 3) -> (x, y, confidence)
@@ -93,6 +93,8 @@ def get_caracteristicas_esqueleto(prediction):
     print("-" * 50)
     return caracteristicas
 
+
+
 def detectar_pessoas(image_np):
     # Fazer a detecção de objetos com YOLO, filtrando apenas pessoas (classe 0)
     results = model.predict(image_np, classes=[0])
@@ -100,47 +102,6 @@ def detectar_pessoas(image_np):
 
     return pessoas_detectadas
 
-def detectar_objetos(image_np):
-    model_path = "./runs/detect/train10/weights/best.pt"
-    model = YOLO(model_path)
-
-    results = model(frame)
-    objetos_detectados = results[0]
-
-    return objetos_detectados
-
-def histograma_tons_de_cinza(gray_crop):
-    gray_hist = cv2.calcHist([gray_crop], [0], None, [256], [0, 256])
-    gray_hist = cv2.normalize(gray_hist, gray_hist).flatten()  # Normalizar e achatar para exibição
-    return gray_hist
-
-def direcoes_de_borda(gray_crop):
-    # Calcular gradientes usando Sobel
-    grad_x = cv2.Sobel(gray_crop, cv2.CV_64F, 1, 0, ksize=3)
-    grad_y = cv2.Sobel(gray_crop, cv2.CV_64F, 0, 1, ksize=3)
-
-    # Calcular magnitude e direção do gradiente
-    magnitude = np.sqrt(grad_x**2 + grad_y**2)
-    direcao = np.arctan2(grad_y, grad_x) * (180 / np.pi)  # Converter para graus
-    
-    # Selecionar pixels que estão na borda (tem pelo menos um vizinho diferente)
-    bordas = (gray_crop > 0) & (cv2.morphologyEx(gray_crop, cv2.MORPH_GRADIENT, np.ones((3,3), np.uint8)) > 0)
-
-    # Filtrar direções apenas nos pixels da borda
-    return direcao[bordas]
-
-def get_caracteristicas_painel(subimagem):
-    caracteristicas = []
-    gray_crop = cv2.cvtColor(subimagem, cv2.COLOR_BGR2GRAY)
-            
-    direcoes_borda = direcoes_de_borda(gray_crop)
-    caracteristicas.append({"Direções de Borda": direcoes_borda.tolist()})
-
-    histograma = histograma_tons_de_cinza(gray_crop)
-    caracteristicas.append({"Histograma Tons de Cinza": histograma.tolist()})
-
-    return caracteristicas
-    
 train_path = os.path.abspath(r'dataset/raw/train') # Caminho para o diretório de vídeos
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
@@ -195,26 +156,8 @@ for root, dirs, files in os.walk(train_path):
                 
                 caracteristicas_box = []
                 for prediction in predictions:
-                    caracteristicas_box.append(get_caracteristicas_esqueleto(prediction))
+                    caracteristicas_box.append(get_caracteristicas(prediction))
                 caracteristicas_cena.append(caracteristicas_box)
-            
-            image_full_np = np.array(frame)
-            objetos_detectados = detectar_objetos(image_full_np)
-
-            boxes = objetos_detectados.boxes  # Contém as coordenadas das caixas delimitadora
-            classes = {valor: chave for chave, valor in objetos_detectados.names.items()}
-
-            for i, box in enumerate(boxes):
-                # Extrair as coordenadas da caixa delimitadora
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                subimagem_np = image_full_np[y1:y2, x1:x2]
-
-                caracteristicas_box = []
-                if box.cls == classes["Painel"]: 
-                    caracteristicas_box.append(get_caracteristicas_painel(subimagem_np))
-
-                caracteristicas_cena.append(caracteristicas_box)
-
             with open(video_path.replace(".jpg", ".json").replace("imagens", "caracteristicas"), 'w', encoding='utf-8') as arquivo:
                 json.dump(caracteristicas_cena, arquivo, ensure_ascii=False, indent=4)
         

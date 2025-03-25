@@ -101,7 +101,7 @@ print(y_train)
 # Construir o modelo ConvLSTM
 model = Sequential()
 
-model.add(ConvLSTM2D(filters=64, kernel_size=(3, 3), padding='sa                 me', return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2], X_train.shape[3], 4)))
+model.add(ConvLSTM2D(filters=64, kernel_size=(3, 3), padding='same', return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2], X_train.shape[3], 4)))
 model.add(BatchNormalization())
 model.add(Dropout(0.3))
 
