@@ -136,12 +136,9 @@ def detecta_faixa(frame_do_video, faixa_menor):
                 angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
 
                 # Filtrar apenas linhas com ângulo próximo ao da faixa (por exemplo, entre 70° e 110°)
+                if faixa_menor and angle < 0 or not faixa_menor and 60 <= angle <= 80:
                 # Ajustar coordenadas da linha com base na posição do crop
-                # cv2.line(img_plot, 
-                #         (int(x1 + box.xyxy[0][0]), int(y1 + box.xyxy[0][1])), 
-                #         (int(x2 + box.xyxy[0][0]), int(y2 + box.xyxy[0][1])), 
-                #         (0, 255, 0), 2)
-                linhas_coordenadas.append((int(x1 + box.xyxy[0][0]), int(y1 + box.xyxy[0][1]), int(x2 + box.xyxy[0][0]), int(y2 + box.xyxy[0][1])))
+                    linhas_coordenadas.append((int(x1 + box.xyxy[0][0]), int(y1 + box.xyxy[0][1]), int(x2 + box.xyxy[0][0]), int(y2 + box.xyxy[0][1])))
 
     return linhas_coordenadas
 
