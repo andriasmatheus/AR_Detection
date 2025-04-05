@@ -1,0 +1,2 @@
+Data do treinamento: 2025-03-16 13:03:32
+Duração do treinamento: 545.07 minutos
